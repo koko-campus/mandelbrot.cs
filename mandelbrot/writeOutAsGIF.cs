@@ -7,9 +7,9 @@ internal static partial class Program
 {
     public static void SaveAnimatedGif(string fileName, Bitmap[] baseImages, UInt16 delayTime, UInt16 loopCount)
     {
-        //書き込み先のファイルを開く
+        // 書き込み先のファイルを開く
         FileStream writerFs = new FileStream(fileName, FileMode.Create, FileAccess.Write, FileShare.None);
-        //BinaryWriterで書き込む
+        // BinaryWriterで書き込む
         BinaryWriter writer = new BinaryWriter(writerFs);
 
         MemoryStream ms = new MemoryStream();
@@ -19,15 +19,15 @@ internal static partial class Program
         int imagesCount = baseImages.Length;
         for (int i = 0; i < imagesCount; i++)
         {
-            //画像をGIFに変換して、MemoryStreamに入れる
+            // 画像をGIFに変換して、MemoryStreamに入れる
             Bitmap bmp = baseImages[i];
             bmp.Save(ms, ImageFormat.Gif);
             ms.Position = 0;
 
             if (i == 0)
             {
-                //ヘッダを書き込む
-                //Header
+                // ヘッダを書き込む
+                // Header
                 writer.Write(ReadBytes(ms, 6));
 
                 //Logical Screen Descriptor
@@ -35,7 +35,7 @@ internal static partial class Program
                 //Global Color Tableがあるか確認
                 if ((screenDescriptor[4] & 0x80) != 0)
                 {
-                    //Color Tableのサイズを取得
+                    // Color Tableのサイズを取得
                     colorTableSize = screenDescriptor[4] & 0x07;
                     hasGlobalColorTable = true;
                 }
@@ -43,68 +43,68 @@ internal static partial class Program
                 {
                     hasGlobalColorTable = false;
                 }
-                //Global Color Tableを使わない
-                //広域配色表フラグと広域配色表の寸法を消す
+                // Global Color Tableを使わない
+                // 広域配色表フラグと広域配色表の寸法を消す
                 screenDescriptor[4] = (byte)(screenDescriptor[4] & 0x78);
                 writer.Write(screenDescriptor);
 
-                //Application Extension
+                // Application Extension
                 writer.Write(GetApplicationExtension(loopCount));
             }
             else
             {
-                //HeaderとLogical Screen Descriptorをスキップ
+                // HeaderとLogical Screen Descriptorをスキップ
                 ms.Position += 6 + 7;
             }
 
             byte[] colorTable = null;
             if (hasGlobalColorTable)
             {
-                //Color Tableを取得
+                // Color Tableを取得
                 colorTable = ReadBytes(ms, (int)Math.Pow(2, colorTableSize + 1) * 3);
             }
 
             //Graphics Control Extension
             writer.Write(GetGraphicControlExtension(delayTime));
-            //基のGraphics Control Extensionをスキップ
+            // 基のGraphics Control Extensionをスキップ
             if (ms.GetBuffer()[ms.Position] == 0x21)
             {
                 ms.Position += 8;
             }
 
-            //Image Descriptor
+            // Image Descriptor
             byte[] imageDescriptor = ReadBytes(ms, 10);
             if (!hasGlobalColorTable)
             {
-                //Local Color Tableを持っているか確認
+                // Local Color Tableを持っているか確認
                 if ((imageDescriptor[9] & 0x80) == 0)
                     throw new Exception("Not found color table.");
-                //Color Tableのサイズを取得
+                // Color Tableのサイズを取得
                 colorTableSize = imageDescriptor[9] & 7;
-                //Color Tableを取得
+                // Color Tableを取得
                 colorTable = ReadBytes(ms, (int)Math.Pow(2, colorTableSize + 1) * 3);
             }
-            //狭域配色表フラグ (Local Color Table Flag) と狭域配色表の寸法を追加
+            // 狭域配色表フラグ (Local Color Table Flag) と狭域配色表の寸法を追加
             imageDescriptor[9] = (byte)(imageDescriptor[9] | 0x80 | colorTableSize);
             writer.Write(imageDescriptor);
 
-            //Local Color Tableを書き込む
+            // Local Color Tableを書き込む
             writer.Write(colorTable);
 
-            //Image Dataを書き込む (終了部は書き込まない)
+            // Image Dataを書き込む (終了部は書き込まない)
             writer.Write(ReadBytes(ms, (int)(ms.Length - ms.Position - 1)));
 
             if (i == imagesCount - 1)
             {
-                //終了部 (Trailer)
+                // 終了部 (Trailer)
                 writer.Write((byte)0x3B);
             }
 
-            //MemoryStreamをリセット
+            // MemoryStreamをリセット
             ms.SetLength(0);
         }
 
-        //後始末
+        // 後始末
         ms.Close();
         writer.Close();
         writerFs.Close();
@@ -120,13 +120,13 @@ internal static partial class Program
     {
         byte[] bs = new byte[19];
 
-        //拡張導入符 (Extension Introducer)
+        // 拡張導入符 (Extension Introducer)
         bs[0] = 0x21;
-        //アプリケーション拡張ラベル (Application Extension Label)
+        // アプリケーション拡張ラベル (Application Extension Label)
         bs[1] = 0xFF;
-        //ブロック寸法 (Block Size)
+        // ブロック寸法 (Block Size)
         bs[2] = 0x0B;
-        //アプリケーション識別名 (Application Identifier)
+        // アプリケーション識別名 (Application Identifier)
         bs[3] = (byte)'N';
         bs[4] = (byte)'E';
         bs[5] = (byte)'T';
@@ -135,19 +135,19 @@ internal static partial class Program
         bs[8] = (byte)'A';
         bs[9] = (byte)'P';
         bs[10] = (byte)'E';
-        //アプリケーション確証符号 (Application Authentication Code)
+        // アプリケーション確証符号 (Application Authentication Code)
         bs[11] = (byte)'2';
         bs[12] = (byte)'.';
         bs[13] = (byte)'0';
-        //データ副ブロック寸法 (Data Sub-block Size)
+        // データ副ブロック寸法 (Data Sub-block Size)
         bs[14] = 0x03;
-        //詰め込み欄 [ネットスケープ拡張コード (Netscape Extension Code)]
+        // 詰め込み欄 [ネットスケープ拡張コード (Netscape Extension Code)]
         bs[15] = 0x01;
-        //繰り返し回数 (Loop Count)
+        // 繰り返し回数 (Loop Count)
         byte[] loopCountBytes = BitConverter.GetBytes(loopCount);
         bs[16] = loopCountBytes[0];
         bs[17] = loopCountBytes[1];
-        //ブロック終了符 (Block Terminator)
+        // ブロック終了符 (Block Terminator)
         bs[18] = 0x00;
 
         return bs;
@@ -162,23 +162,23 @@ internal static partial class Program
     {
         byte[] bs = new byte[8];
 
-        //拡張導入符 (Extension Introducer)
+        // 拡張導入符 (Extension Introducer)
         bs[0] = 0x21;
-        //グラフィック制御ラベル (Graphic Control Label)
+        // グラフィック制御ラベル (Graphic Control Label)
         bs[1] = 0xF9;
-        //ブロック寸法 (Block Size, Byte Size)
+        // ブロック寸法 (Block Size, Byte Size)
         bs[2] = 0x04;
-        //詰め込み欄 (Packed Field)
-        //透過色指標を使う時は+1
-        //消去方法:そのまま残す+4、背景色でつぶす+8、直前の画像に戻す+12
+        // 詰め込み欄 (Packed Field)
+        // 透過色指標を使う時は+1
+        // 消去方法:そのまま残す+4、背景色でつぶす+8、直前の画像に戻す+12
         bs[3] = 0x00;
-        //遅延時間 (Delay Time)
+        // 遅延時間 (Delay Time)
         byte[] delayTimeBytes = BitConverter.GetBytes(delayTime);
         bs[4] = delayTimeBytes[0];
         bs[5] = delayTimeBytes[1];
-        //透過色指標 (Transparency Index, Transparent Color Index)
+        // 透過色指標 (Transparency Index, Transparent Color Index)
         bs[6] = 0x00;
-        //ブロック終了符 (Block Terminator)
+        // ブロック終了符 (Block Terminator)
         bs[7] = 0x00;
 
         return bs;
