@@ -1,7 +1,7 @@
-﻿
-using System.IO;
-using System.Drawing.Imaging;
+﻿using System.Drawing.Imaging;
 using System.Drawing;
+
+#pragma warning disable
 
 internal static partial class Program
 {
@@ -184,3 +184,5 @@ internal static partial class Program
     return bs;
   }
 }
+
+#pragma warning restore
