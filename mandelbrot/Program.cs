@@ -1,79 +1,83 @@
 using System.Drawing;
-using System.Text.RegularExpressions;
 using Microsoft.VisualStudio.Modeling.Diagrams;
 using System.Numerics;
+using CommandLine;
+
+#pragma warning disable CA1416
 
 internal static partial class Program
 {
-  static int width = 500;
-  static int height = 500;
-  static double resolution = 200;
-  static double Re = 0.5;
-  static double Im = 2.0;
-  static int hue = 0;
-  static int limit = 20;
-  static int upto = 10;
-  static string file = "";
-  static int count = 30;
-
+  internal static NLog.ILogger logger = NLog.LogManager.GetCurrentClassLogger();
+  
   internal static int Main(string[] args)
   {
-    Parse(args);
-
-    if (IsNum(Obtain("-w"))) width = int.Parse(Obtain("-w"));
-    if (IsNum(Obtain("-h"))) height = int.Parse(Obtain("-h"));
-    if (IsNum(Obtain("-rs"))) resolution = double.Parse(Obtain("-rs"));
-    if (IsNum(Obtain("-re"))) Re = double.Parse(Obtain("-re"));
-    if (IsNum(Obtain("-im"))) Im = double.Parse(Obtain("-im"));
-    if (IsNum(Obtain("-hue"))) hue = int.Parse(Obtain("-hue"));
-    if (IsNum(Obtain("-limit"))) limit = int.Parse(Obtain("-limit"));
-    if (IsNum(Obtain("-upto"))) upto = int.Parse(Obtain("-upto"));
-    if (IsNum(Obtain("-count"))) count = int.Parse(Obtain("-count"));
-    file = Obtain("-f") != "" ? Obtain("-f") : $@"1.gif";
-
-    if (File.Exists(file)) File.Delete(file);
-
-    Bitmap[] gifs = new Bitmap[count];
-    List<Task> tasks = new List<Task>();
-
-    foreach (var counter in Enumerable.Range(0, count))
+    try
     {
-      var task = Task.Run(() => {
-        Console.WriteLine($"{counter} started / out of ({count})");
-        resolution *= 1.05;
-        Bitmap canvas = new(width, height);
-        for (double x = 0; x < width; x++)
-        {
-          for (double y = 0; y < height; y++)
+      var options = Parser.Default.ParseArguments<Options>(args);
+
+      if (options.Tag == ParserResultType.NotParsed)
+      {
+        logger.Error("オプションの解析に失敗しました。");
+        return 1;
+      }
+
+      // メイン処理
+
+      // 必要な変数の宣言
+      var width = options.Value.Width;
+      var height = options.Value.Height;
+      var resolution = options.Value.Resolution;
+      var Re = options.Value.Re;
+      var Im = options.Value.Im;
+      var hue = options.Value.Hue;
+      var limit = options.Value.Limit;
+      var upto = options.Value.Upto;
+      var file = options.Value.File;
+      var count = options.Value.Count;      
+
+      if (File.Exists(file)) File.Delete(file);
+
+      Bitmap[] gifs = new Bitmap[count];
+      List<Task> tasks = new();
+
+      foreach (var counter in Enumerable.Range(0, count))
+      {
+        var task = Task.Run(() => {
+          logger.Info($"画像ビットマップデータの生成を開始します。({counter} / {count})");
+          resolution *= 1.05;
+          Bitmap canvas = new(width, height);
+          for (double x = 0; x < width; x++)
           {
-            int result = Check(x / resolution - Re, y / resolution - 3 + Im);
-            Color color = Color.Black;
-            if (result != 0)
+            for (double y = 0; y < height; y++)
             {
-              color = new HslColor(hue, 100, result).ToRgbColor();
+              int result = Check(x / resolution - Re, y / resolution - 3 + Im, limit, upto);
+              Color color = Color.Black;
+              if (result != 0)
+              {
+                color = new HslColor(hue, 100, result).ToRgbColor();
+              }
+              canvas.SetPixel((int)x, (int)y, color);
             }
-            canvas.SetPixel((int)x, (int)y, color);
           }
-        }
-        gifs[counter] = canvas;
-        Console.WriteLine($"{counter} ended / out of ({count})");
-      });
-      tasks.Add(task);
+          gifs[counter] = canvas;
+          logger.Info($"画像ビットマップデータの生成が完了しました。({counter} / {count})");
+        });
+        tasks.Add(task);
+        // Task.WhenAll(tasks);
+      }
       Task.WhenAll(tasks).Wait();
+
+      SaveAnimatedGif(file, gifs, 10, 0);
+
+      return 0;
+    } catch (Exception ex)
+    {
+      logger.Error(ex, "処理の実行中に対応されていない例外が発生しました。");
+      return 1;
     }
-    Task.WhenAll(tasks).Wait();
-
-    SaveAnimatedGif(file, gifs, 10, 0);
-
-    return 0;
   }
 
-  private static bool IsNum(string num)
-  {
-    return Regex.IsMatch(num, @"\w+\.?\w*");
-  }
-
-  private static int Check(double x, double y)
+  private static int Check(double x, double y, int limit, int upto)
   {
     (var real, var imag) = (x, y);
     for (int i = 0; i < limit; i++)
@@ -92,3 +96,4 @@ internal static partial class Program
   }
 }
 
+#pragma warning restore CA1416
