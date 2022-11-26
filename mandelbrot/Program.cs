@@ -1,11 +1,7 @@
-
 using System.Drawing;
-using System.Security.Cryptography.X509Certificates;
 using System.Text.RegularExpressions;
 using Microsoft.VisualStudio.Modeling.Diagrams;
 using System.Numerics;
-using System.Diagnostics;
-using System.Threading.Tasks;
 
 internal static partial class Program
 {
