@@ -63,7 +63,7 @@ internal static partial class Program
           logger.Info($"画像ビットマップデータの生成が完了しました。({counter} / {count})");
         });
         tasks.Add(task);
-        // Task.WhenAll(tasks);
+        Task.WhenAll(tasks).Wait();
       }
       Task.WhenAll(tasks).Wait();
 
