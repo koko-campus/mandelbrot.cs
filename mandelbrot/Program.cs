@@ -33,6 +33,7 @@ internal static partial class Program
       var limit = options.Value.Limit;
       var upto = options.Value.Upto;
       var file = options.Value.File;
+      var zoom = options.Value.zoom;
       var count = options.Value.Count;      
 
       if (File.Exists(file)) File.Delete(file);
@@ -44,7 +45,7 @@ internal static partial class Program
       {
         var task = Task.Run(() => {
           logger.Info($"画像ビットマップデータの生成を開始します。({counter} / {count})");
-          var _resolution = resolution * Math.Pow(1.05, counter);
+          var _resolution = resolution * Math.Pow(zoom, counter);
           Bitmap canvas = new(width, height);
           for (double x = 0; x < width; x++)
           {

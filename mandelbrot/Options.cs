@@ -28,6 +28,9 @@ class Options
   
   [Option("file", Required = false, HelpText = "出力先ファイル名を指定します。")]
   internal string File { get; set; } = "mandelbrot.gif";
+
+  [Option("zoom", Required = false, HelpText = "ズームレベルを設定します。")]
+  internal double zoom { get; set; } = 1.05;
   
   [Option("count", Required = false, HelpText = "カウントを指定します。")]
   internal int Count { get; set; } = 30;
