@@ -15,7 +15,7 @@ class Options
   internal double Re { get; set; } = 0.5;
 
   [Option("im", Required = false, HelpText = "虚軸の開始点を指定します。")]
-  internal double Im { get; set; } = 2.0;
+  internal double Im { get; set; } = -1.0;
 
   [Option("hue", Required = false, HelpText = "集合の着色を色相を指定します。")]
   internal int Hue { get; set; } = 0;
@@ -30,5 +30,5 @@ class Options
   internal string File { get; set; } = "mandelbrot.gif";
   
   [Option("count", Required = false, HelpText = "カウントを指定します。")]
-  internal int Count { get; set; } = 30;
+  internal int Count { get; set; } = 1;
 }

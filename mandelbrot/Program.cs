@@ -50,7 +50,7 @@ internal static partial class Program
           {
             for (double y = 0; y < height; y++)
             {
-              int result = Check(x / resolution - Re, y / resolution - 3 + Im, limit, upto);
+              int result = Check(x / resolution - Re, y / resolution + Im, limit, upto);
               Color color = Color.Black;
               if (result != 0)
               {
