@@ -30,5 +30,5 @@ class Options
   internal string File { get; set; } = "mandelbrot.gif";
   
   [Option("count", Required = false, HelpText = "カウントを指定します。")]
-  internal int Count { get; set; } = 1;
+  internal int Count { get; set; } = 30;
 }
