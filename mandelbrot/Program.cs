@@ -33,7 +33,7 @@ internal static partial class Program
       var limit = options.Value.Limit;
       var upto = options.Value.Upto;
       var file = options.Value.File;
-      var zoom = options.Value.zoom;
+      var zoom = options.Value.Zoom;
       var count = options.Value.Count;      
 
       if (File.Exists(file)) File.Delete(file);
