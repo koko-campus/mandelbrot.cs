@@ -44,13 +44,13 @@ internal static partial class Program
       {
         var task = Task.Run(() => {
           logger.Info($"画像ビットマップデータの生成を開始します。({counter} / {count})");
-          resolution *= 1.05;
+          var _resolution = resolution * Math.Pow(1.05, counter);
           Bitmap canvas = new(width, height);
           for (double x = 0; x < width; x++)
           {
             for (double y = 0; y < height; y++)
             {
-              int result = Check(x / resolution - Re, y / resolution + Im, limit, upto);
+              int result = Check(x / _resolution - Re, y / _resolution + Im, limit, upto);
               Color color = Color.Black;
               if (result != 0)
               {
@@ -63,7 +63,6 @@ internal static partial class Program
           logger.Info($"画像ビットマップデータの生成が完了しました。({counter} / {count})");
         });
         tasks.Add(task);
-        Task.WhenAll(tasks).Wait();
       }
       Task.WhenAll(tasks).Wait();
 
