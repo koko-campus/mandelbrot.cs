@@ -8,21 +8,19 @@ GIFフォーマットでマンデルブロ集合の探索をアニメーショ�
 
 ## 実行方法
 
-以下のパラメタをコマンドライン引数にセットして実行。 
+以下のパラメタをコマンドライン引数にセットして実行。  
 
-```csharp
-var width = options.Value.Width;
-var height = options.Value.Height;
-var resolution = options.Value.Resolution;
-var Re = options.Value.Re;
-var Im = options.Value.Im;
-var hue = options.Value.Hue;
-var limit = options.Value.Limit;
-var upto = options.Value.Upto;
-var file = options.Value.File;
-var zoom = options.Value.Zoom;
-var count = options.Value.Count;
-```
+- w (width) | 横幅
+- h (height) | 縦幅
+- rs (resolution) | 解像度
+- r (re) | 実軸開始点
+- i (im) | 虚軸開始点
+- h (hue) | 彩度
+- l (limit) | 収束判定の閾値
+- x (max) | 最大反復回数
+- f (file) | 出力先ファイル名
+- z (zoom) | ズームレベル
+- c (count) | 画像数
 
 ## 開発環境
 
